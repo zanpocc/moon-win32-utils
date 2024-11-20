@@ -34,13 +34,20 @@ pub fn adjust_privilege() -> Result<(), NTSTATUS> {
 
 impl DriverLoader {
     pub fn new() -> Self {
-        //
-
         Self {}
     }
 
     // service load driver
     pub fn srv_load(&self, file: &str) -> Result<(), NTSTATUS> {
+        let image_path = format!("\\\\?\\{}", file);
+        match std::fs::metadata(image_path) {
+            Ok(meta) => println!("Driver exists, size: {}", meta.len()),
+            Err(err) => {
+                println!("Failed to access driver file: {}", err);
+                return Err(STATUS_UNSUCCESSFUL);
+            }
+        }
+
         // 1
         adjust_privilege()?;
 
@@ -98,6 +105,15 @@ impl DriverLoader {
 
     // service load driver
     pub fn srv_unload(&self, file: &str) -> Result<(), NTSTATUS> {
+        let image_path = format!("\\\\?\\{}", file);
+        match std::fs::metadata(image_path) {
+            Ok(meta) => println!("Driver exists, size: {}", meta.len()),
+            Err(err) => {
+                println!("Failed to access driver file: {}", err);
+                return Err(STATUS_UNSUCCESSFUL);
+            }
+        }
+
         // 1
         adjust_privilege()?;
 
@@ -138,7 +154,7 @@ impl DriverLoader {
     // mapping memory load driver
     // pub fn mapping_load(&self, file: &str) {}
 
-    // pub fn io_ctl(&self,) {}
+    pub fn io_ctl(&self, symbol_link: &str) {}
 }
 
 #[cfg(test)]
