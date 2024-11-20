@@ -35,7 +35,7 @@ fn main() {
     if unload {
         let r = loader.srv_unload(&file_path);
         if r.is_err() {
-            print!("error to unload:{:?}", r.err().unwrap());
+            println!("error to unload:{:?}", r.err().unwrap());
             return;
         }
 
@@ -43,7 +43,7 @@ fn main() {
     } else {
         let r = loader.srv_load(file_path);
         if r.is_err() {
-            print!("error to load:{:?}", r.err().unwrap());
+            println!("error to load:{:?}", r.err().unwrap());
             return;
         }
 

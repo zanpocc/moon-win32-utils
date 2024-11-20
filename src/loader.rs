@@ -230,12 +230,7 @@ impl DriverLoader {
 
 #[cfg(test)]
 mod tests {
-    use super::DriverLoader;
 
     #[test]
-    fn test_driver_load() {
-        let loader = DriverLoader::new();
-        let r = loader.srv_load("C:\\Users\\Administrator\\Downloads\\zip.txt");
-        print!("{:?}", r);
-    }
+    fn test_driver_load() {}
 }

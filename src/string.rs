@@ -7,7 +7,7 @@ use windows::{core::PWSTR, Win32::Foundation::UNICODE_STRING};
 
 pub struct SafeUnicodeString {
     pub unicode_string: UNICODE_STRING,
-    _buffer: Box<[u16]>, // 持有缓冲区，保证生命周期
+    _buffer: Box<[u16]>,
 }
 
 impl SafeUnicodeString {
@@ -64,18 +64,18 @@ pub fn u16_slice_to_string(s: &[u16]) -> String {
 }
 
 pub fn str_to_unicode_string(s: &str) -> SafeUnicodeString {
-    let wide: Vec<u16> = s.encode_utf16().chain(Some(0)).collect(); // 包含 NULL 终止符
+    let wide: Vec<u16> = s.encode_utf16().chain(Some(0)).collect();
     let buffer = wide.into_boxed_slice();
 
     let unicode_string = UNICODE_STRING {
-        Length: ((buffer.len() - 1) * 2) as u16,  // 不包含 NULL
-        MaximumLength: (buffer.len() * 2) as u16, // 包含 NULL
+        Length: ((buffer.len() - 1) * 2) as u16,
+        MaximumLength: (buffer.len() * 2) as u16,
         Buffer: PWSTR(buffer.as_ptr() as *mut _),
     };
 
     SafeUnicodeString {
         unicode_string,
-        _buffer: buffer, // 持有缓冲区
+        _buffer: buffer,
     }
 }
 
