@@ -1,17 +1,32 @@
 use std::path::Path;
 
-use windows::Win32::{
-    Foundation::{
-        NTSTATUS, STATUS_ALREADY_REGISTERED, STATUS_INVALID_PARAMETER, STATUS_SUCCESS,
-        STATUS_UNSUCCESSFUL, UNICODE_STRING,
+use windows::{
+    core::{Error, PCWSTR},
+    Win32::{
+        Foundation::{
+            CloseHandle, GENERIC_ALL, HANDLE, NTSTATUS, STATUS_ALREADY_REGISTERED,
+            STATUS_INVALID_PARAMETER, STATUS_SUCCESS, STATUS_UNSUCCESSFUL, UNICODE_STRING,
+        },
+        Storage::FileSystem::{CreateFileW, FILE_ATTRIBUTE_NORMAL, FILE_SHARE_NONE, OPEN_EXISTING},
+        System::{
+            Registry::{HKEY_LOCAL_MACHINE, REG_DWORD, REG_EXPAND_SZ},
+            IO::DeviceIoControl,
+        },
     },
-    System::Registry::{HKEY_LOCAL_MACHINE, REG_DWORD, REG_EXPAND_SZ},
 };
 
 use crate::{
     registry::{create_registry_key, delete_registry_key, registry_key_exists, set_registry_value},
     string::{str_to_unicode_string, string_to_u16_bytes2},
 };
+
+#[repr(C)]
+#[derive(Debug)]
+pub struct Communication<T, U> {
+    pub code: u32,
+    pub input: *mut T,
+    pub output: *mut U,
+}
 
 pub struct DriverLoader {}
 
@@ -20,6 +35,28 @@ extern "system" {
         -> NTSTATUS;
     fn NtLoadDriver(service_name: *mut UNICODE_STRING) -> NTSTATUS;
     fn NtUnloadDriver(service_name: *mut UNICODE_STRING) -> NTSTATUS;
+}
+
+pub fn open_file(symbolic_link_path: &str) -> windows::core::Result<HANDLE> {
+    let wide_path: Vec<u16> = symbolic_link_path.encode_utf16().chain(Some(0)).collect();
+
+    let handle = unsafe {
+        CreateFileW(
+            PCWSTR(wide_path.as_ptr()),
+            GENERIC_ALL.0,
+            FILE_SHARE_NONE,
+            None,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            HANDLE::default(),
+        )
+    };
+
+    if handle.is_err() {
+        return Err(handle.err().unwrap());
+    }
+
+    Ok(handle.unwrap())
 }
 
 pub fn adjust_privilege() -> Result<(), NTSTATUS> {
@@ -92,7 +129,6 @@ impl DriverLoader {
         }
 
         // 3
-
         let mut p = str_to_unicode_string(&driver_sub_key);
 
         let r = unsafe { NtLoadDriver(p.as_ptr()) };
@@ -154,7 +190,42 @@ impl DriverLoader {
     // mapping memory load driver
     // pub fn mapping_load(&self, file: &str) {}
 
-    pub fn io_ctl(&self, symbol_link: &str) {}
+    pub fn io_ctl<T, U>(
+        &self,
+        symbol_link: &str,
+        cc: &mut Communication<T, U>,
+    ) -> Result<(), Error> {
+        let handle = open_file(symbol_link);
+        if handle.is_err() {
+            return Err(handle.err().unwrap());
+        }
+
+        let handle = handle.unwrap();
+
+        let mut return_byte: u32 = 0;
+        let r = unsafe {
+            DeviceIoControl(
+                handle,
+                cc.code,
+                Some(cc.input as _),
+                core::mem::size_of::<T>() as _,
+                Some(cc.output as _),
+                core::mem::size_of::<U>() as _,
+                Some(&mut return_byte as *mut _),
+                None,
+            )
+        };
+
+        if r.is_err() {
+            return Err(r.err().unwrap());
+        }
+
+        unsafe {
+            let _ = CloseHandle(handle);
+        };
+
+        Ok(())
+    }
 }
 
 #[cfg(test)]
