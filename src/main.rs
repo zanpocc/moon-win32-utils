@@ -47,7 +47,7 @@ fn main() {
             return;
         }
 
-        let mut input = DeviceIoTestOut {
+        let input = DeviceIoTestOut {
             length: 3,
             maximum_length: 4,
         };
@@ -58,8 +58,8 @@ fn main() {
 
         let mut cc = Communication {
             code: IOCTL_DEVICE_IO_CONTROL_TEST,
-            input: &mut input as *mut _,
-            output: &mut output as *mut _,
+            input: &input,
+            output: &mut output,
         };
 
         let r = loader.io_ctl("\\\\.\\20240703", &mut cc);

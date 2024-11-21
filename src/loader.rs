@@ -22,10 +22,10 @@ use crate::{
 
 #[repr(C)]
 #[derive(Debug)]
-pub struct Communication<T, U> {
+pub struct Communication<'a, T, U> {
     pub code: u32,
-    pub input: *mut T,
-    pub output: *mut U,
+    pub input: &'a T,
+    pub output: &'a mut U,
 }
 
 pub struct DriverLoader {}
@@ -203,13 +203,14 @@ impl DriverLoader {
         let handle = handle.unwrap();
 
         let mut return_byte: u32 = 0;
+
         let r = unsafe {
             DeviceIoControl(
                 handle,
                 cc.code,
-                Some(cc.input as _),
+                Some(cc.input as *const _ as _),
                 core::mem::size_of::<T>() as _,
-                Some(cc.output as _),
+                Some(cc.output as *mut _ as _),
                 core::mem::size_of::<U>() as _,
                 Some(&mut return_byte as *mut _),
                 None,
