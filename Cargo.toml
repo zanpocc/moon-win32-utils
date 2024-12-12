@@ -1,5 +1,5 @@
 [package]
-name = "moon-driver-loader"
+name = "moon-win32-utils"
 version = "0.1.0"
 edition = "2021"
 
