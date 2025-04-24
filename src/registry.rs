@@ -1,3 +1,5 @@
+use windows::Win32::System::Registry::{HKEY_CURRENT_USER, REG_SZ};
+
 use windows::{
     core::PCWSTR,
     Win32::System::Registry::{
@@ -25,6 +27,57 @@ impl Drop for RegistryKey {
         let _ = unsafe { RegCloseKey(self.raw) };
     }
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_create_and_delete_registry_key() {
+        let sub_key = "Software\\TestKey";
+        let result = create_registry_key(HKEY_CURRENT_USER, sub_key);
+        assert!(result.is_ok());
+
+        let delete_result = delete_registry_key(HKEY_CURRENT_USER, sub_key);
+        assert!(delete_result.is_ok());
+    }
+
+    #[test]
+    fn test_registry_key_exists() {
+        let sub_key = "Software\\TestKeyExists";
+        let _ = create_registry_key(HKEY_CURRENT_USER, sub_key);
+
+        assert!(registry_key_exists(HKEY_CURRENT_USER, sub_key));
+
+        let _ = delete_registry_key(HKEY_CURRENT_USER, sub_key);
+        assert!(!registry_key_exists(HKEY_CURRENT_USER, sub_key));
+    }
+
+    #[test]
+    fn test_set_registry_value() {
+        let sub_key = "Software\\TestSetValue";
+        let key = create_registry_key(HKEY_CURRENT_USER, sub_key).unwrap();
+
+        let value_name = "TestValue";
+        let value_data = "TestData".as_bytes();
+        let result = set_registry_value(&key, value_name, REG_SZ, value_data);
+        assert!(result.is_ok());
+
+        let _ = delete_registry_key(HKEY_CURRENT_USER, sub_key);
+    }
+
+    #[test]
+    fn test_open_registry_key() {
+        let sub_key = "Software\\TestOpenKey";
+        let _ = create_registry_key(HKEY_CURRENT_USER, sub_key);
+
+        let result = open_registry_key(HKEY_CURRENT_USER, sub_key);
+        assert!(result.is_ok());
+
+        let _ = delete_registry_key(HKEY_CURRENT_USER, sub_key);
+    }
+    
+}
+
 
 pub fn open_registry_key(hkey: HKEY, sub_key: &str) -> windows::core::Result<RegistryKey> {
     unsafe {
