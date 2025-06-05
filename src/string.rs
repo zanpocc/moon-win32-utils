@@ -34,9 +34,13 @@ pub fn string_to_u16_slice(input: &str) -> Vec<u16> {
     utf16_vec
 }
 
-pub fn string_to_u16_bytes2(s: &str) -> Vec<u8> {
-    let r = string_to_u16_slice(s);
-    u16_to_u8_le(&r)
+pub fn string_to_u16_bytes2(s: &str,cstr_end: bool) -> Vec<u8> {
+    let mut utf16_vec: Vec<u16> = s.encode_utf16().collect();
+    if cstr_end {
+        utf16_vec.push(0);
+    }
+    
+    u16_to_u8_le(&utf16_vec)
 }
 
 pub fn u16_slice_to_unicode_string(s: &[u16]) -> UNICODE_STRING {
