@@ -75,7 +75,7 @@ mod tests {
 
         let _ = delete_registry_key(HKEY_CURRENT_USER, sub_key);
     }
-    
+
 }
 
 

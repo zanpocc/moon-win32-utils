@@ -2,19 +2,13 @@
 #![allow(clippy::all)]
 
 use std::ffi::c_void;
-use std::os::raw::{c_ulong, c_ushort};
+use std::os::raw::{c_ulong};
 
-use windows::Win32::Foundation::UNICODE_STRING;
+use windows::core::PCWSTR;
+use windows::Win32::Foundation::{BOOLEAN, HANDLE, NTSTATUS, UNICODE_STRING};
 
-pub type NTSTATUS = c_ulong;
-pub type HANDLE = *mut c_void;
 pub type PVOID = *mut c_void;
 pub type ULONG = c_ulong;
-pub type USHORT = c_ushort;
-pub type WCHAR = u16;
-pub type PWSTR = *mut WCHAR;
-pub type PCWSTR = *const WCHAR;
-pub type BOOLEAN = u8;
 
 #[link(name = "ntdll")]
 extern "system" {
