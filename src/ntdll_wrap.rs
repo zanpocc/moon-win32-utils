@@ -2,6 +2,8 @@ use windows::Win32::Foundation::{BOOLEAN, NTSTATUS, STATUS_SUCCESS};
 
 use crate::{ntdll::{NtLoadDriver, NtUnloadDriver, RtlAdjustPrivilege}, string::str_to_unicode_string};
 
+pub const SE_LOAD_DRIVER_PRIVILEGE: u32 = 10; // SE_LOAD_DRIVER_PRIVILEGE constant value
+pub const SE_DEBUG_PRIVILEGE: u32 = 20;       // SE_DEBUG_PRIVILEGE constant value    
 
 pub fn adjust_privilege(privilege: u32) -> Result<(), NTSTATUS> {
     let mut was_enabled: BOOLEAN = BOOLEAN(0);
