@@ -20,6 +20,14 @@ impl SafeUnicodeString {
     }
 }
 
+fn u16_to_u8_le(u16_vec: &[u16]) -> Vec<u8> {
+    let mut result = Vec::with_capacity(u16_vec.len() * 2);
+    for &num in u16_vec {
+        result.extend(num.to_le_bytes()); 
+    }
+    result
+}
+
 pub fn string_to_u16_slice(input: &str) -> Vec<u16> {
     let utf16_iter = input.encode_utf16();
     let utf16_vec: Vec<u16> = utf16_iter.collect();
@@ -27,13 +35,8 @@ pub fn string_to_u16_slice(input: &str) -> Vec<u16> {
 }
 
 pub fn string_to_u16_bytes2(s: &str) -> Vec<u8> {
-    let mut u16_bytes = Vec::with_capacity(s.len() * 2);
-    for c in s.chars() {
-        let u16_value = c as u16;
-        u16_bytes.push((u16_value & 0xFF) as u8);
-        u16_bytes.push((u16_value >> 8) as u8);
-    }
-    u16_bytes
+    let r = string_to_u16_slice(s);
+    u16_to_u8_le(&r)
 }
 
 pub fn u16_slice_to_unicode_string(s: &[u16]) -> UNICODE_STRING {
