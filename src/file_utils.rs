@@ -1,5 +1,5 @@
 use rand::Rng;
-use windows::Win32::{Foundation::MAX_PATH, Storage::FileSystem::GetTempPathW};
+use windows::Win32::{Foundation::MAX_PATH, Storage::FileSystem::GetTempPathW, System::SystemInformation::GetSystemDirectoryW};
 
 use crate::string::u16_slice_to_string;
 
@@ -8,6 +8,17 @@ pub fn get_temp_path() -> String {
     let r = unsafe { GetTempPathW(Some(&mut buffer as _)) };
     if r == 0 || r > MAX_PATH {
         panic!("GetTempPath Error");
+    }
+
+    let temp = u16_slice_to_string(&buffer[0..r as usize]);
+    temp
+}
+
+pub fn get_system_directory() -> String {
+    let mut buffer: [u16; MAX_PATH as _] = [0; MAX_PATH as _];
+    let r = unsafe { GetSystemDirectoryW(Some(&mut buffer as _)) };
+    if r == 0 || r > MAX_PATH {
+        panic!("GetSystemDirectoryW Error");
     }
 
     let temp = u16_slice_to_string(&buffer[0..r as usize]);

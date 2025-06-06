@@ -28,13 +28,16 @@ fn u16_to_u8_le(u16_vec: &[u16]) -> Vec<u8> {
     result
 }
 
-pub fn string_to_u16_slice(input: &str) -> Vec<u16> {
+pub fn string_to_u16_slice_u16(input: &str,cstr_end: bool) -> Vec<u16> {
     let utf16_iter = input.encode_utf16();
-    let utf16_vec: Vec<u16> = utf16_iter.collect();
+    let mut utf16_vec: Vec<u16> = utf16_iter.collect();
+    if cstr_end {
+        utf16_vec.push(0);
+    }
     utf16_vec
 }
 
-pub fn string_to_u16_bytes2(s: &str,cstr_end: bool) -> Vec<u8> {
+pub fn string_to_u16_slice_u8(s: &str,cstr_end: bool) -> Vec<u8> {
     let mut utf16_vec: Vec<u16> = s.encode_utf16().collect();
     if cstr_end {
         utf16_vec.push(0);

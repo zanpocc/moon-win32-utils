@@ -22,9 +22,9 @@ extern "system" {
 
     pub fn NtQuerySystemInformation(
         SystemInformationClass: ULONG,
-        SystemInformation: PVOID,
+        SystemInformation: *mut c_void,
         SystemInformationLength: ULONG,
-        ReturnLength: *mut ULONG,
+        ReturnLength: *mut c_void,
     ) -> NTSTATUS;
 
     pub fn NtAllocateVirtualMemory(
@@ -66,5 +66,7 @@ extern "system" {
     pub fn NtUnloadDriver(
         DriverServiceName: *mut UNICODE_STRING,
     ) -> NTSTATUS;
+
+  
 }
 
