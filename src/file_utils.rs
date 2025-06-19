@@ -1,7 +1,25 @@
 use rand::Rng;
-use windows::Win32::{Foundation::MAX_PATH, Storage::FileSystem::GetTempPathW, System::SystemInformation::GetSystemDirectoryW};
+use windows::{core::PCWSTR, Win32::{Foundation::{GENERIC_ALL, HANDLE, MAX_PATH}, Storage::FileSystem::{CreateFileW, GetTempPathW, FILE_ATTRIBUTE_NORMAL, FILE_SHARE_NONE, OPEN_EXISTING}, System::SystemInformation::GetSystemDirectoryW}};
 
-use crate::string::u16_slice_to_string;
+use crate::{string::u16_slice_to_string, wrapper::handle::Handle};
+
+fn open_file(symbolic_link_path: &str) -> Result<Handle, windows::core::Error> {
+    let wide_path: Vec<u16> = symbolic_link_path.encode_utf16().chain(Some(0)).collect();
+
+    let handle = unsafe {
+        CreateFileW(
+            PCWSTR(wide_path.as_ptr()),
+            GENERIC_ALL.0,
+            FILE_SHARE_NONE,
+            None,
+            OPEN_EXISTING,
+            FILE_ATTRIBUTE_NORMAL,
+            HANDLE::default(),
+        )?
+    };
+
+    Ok(Handle::from_raw(handle))
+}
 
 pub fn get_temp_path() -> String {
     let mut buffer: [u16; MAX_PATH as _] = [0; MAX_PATH as _];
