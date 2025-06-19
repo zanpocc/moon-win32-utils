@@ -3,7 +3,7 @@ use windows::{core::PCWSTR, Win32::{Foundation::{GENERIC_ALL, HANDLE, MAX_PATH},
 
 use crate::{string::u16_slice_to_string, wrapper::handle::Handle};
 
-fn open_file(symbolic_link_path: &str) -> Result<Handle, windows::core::Error> {
+pub fn open_file(symbolic_link_path: &str) -> Result<Handle, windows::core::Error> {
     let wide_path: Vec<u16> = symbolic_link_path.encode_utf16().chain(Some(0)).collect();
 
     let handle = unsafe {
